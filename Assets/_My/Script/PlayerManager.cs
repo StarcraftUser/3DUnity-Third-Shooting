@@ -3,40 +3,85 @@ using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 
 public class PlayerManager : MonoBehaviour
 {
-    private StarterAssetsInputs input;
+	private StarterAssetsInputs input;
+	private ThirdPersonController controller;
 
-    [Header("Aim")]
-    [SerializeField]
-    private CinemachineVirtualCamera aimCam;
+	[Header("Aim")]
+	[SerializeField]
+	private CinemachineVirtualCamera aimCam;
 
-    [SerializeField]
-    private GameObject aimImage;
-    // Start is called before the first frame update
-    void Start()
-    {
-        input = GetComponent<StarterAssetsInputs>();
-    }
+	[SerializeField]
+	private GameObject aimImage;
 
-    // Update is called once per frame
-    void Update()
-    {
-        AimCheck();
-    }
+	[SerializeField]
+	private GameObject aimObj;
 
-    private void AimCheck()
-    {
-        if (input.aim)
-        {
-            aimCam.gameObject.SetActive(true);
-            aimImage.SetActive(true);
-        }
-        else
-        {
-            aimCam.gameObject.SetActive(false);
-            aimImage.SetActive(false);
-        }
-    }
+	[SerializeField]
+	private LayerMask targetLayer;
+
+	[SerializeField]
+	private float aimObjDis = 10f;
+
+	// Start is called before the first frame update
+	void Start()
+	{
+		input = GetComponent<StarterAssetsInputs>();
+		controller = GetComponent<ThirdPersonController>();
+	}
+
+	// Update is called once per frame
+	void Update()
+	{
+		AimCheck();
+	}
+
+	private void AimCheck()
+	{
+
+
+		if (input.aim)
+		{
+			AimControll(true);
+
+			Vector3 targetPosition = Vector3.zero;
+			Transform camTransform = Camera.main.transform;
+			RaycastHit hit;
+
+			if (Physics.Raycast(camTransform.position, camTransform.forward, out hit, Mathf.Infinity, targetLayer))
+			{
+				//Debug.Log("Name : " + hit.transform.gameObject.name);
+
+				targetPosition = hit.point;
+				aimObj.transform.position = hit.point;
+			}
+			else
+			{
+				targetPosition = camTransform.position + camTransform.forward * aimObjDis;
+				aimObj.transform.position = camTransform.position + camTransform.forward * aimObjDis;
+			}
+
+			Vector3 targetAim = targetPosition;
+			targetAim.y = transform.position.y;
+			Vector3 aimDir = (targetAim - transform.position).normalized;
+
+			transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * 50f);
+
+		}
+		else
+		{
+			AimControll(false);
+
+		}
+	}
+
+	private void AimControll(bool isCheck)
+	{
+		aimCam.gameObject.SetActive(isCheck);
+		aimImage.SetActive(isCheck);
+		controller.isAimMove = isCheck;
+	}
 }
