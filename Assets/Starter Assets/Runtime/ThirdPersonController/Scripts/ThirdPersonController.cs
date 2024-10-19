@@ -123,7 +123,7 @@ namespace StarterAssets
 		}
 
 		public bool isAimMove = false;
-
+		public bool isReload = false;
 
 		private void Awake()
 		{
@@ -218,7 +218,7 @@ namespace StarterAssets
 			// set target speed based on move speed, sprint speed and if sprint is pressed
 			float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
-			if (isAimMove)
+			if (isAimMove || isReload)
 			{
 				targetSpeed = MoveSpeed;
 			}

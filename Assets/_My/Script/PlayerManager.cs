@@ -3,13 +3,14 @@ using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem.XR;
 
 public class PlayerManager : MonoBehaviour
 {
 	private StarterAssetsInputs input;
 	private ThirdPersonController controller;
-
+	private Animator anim;
 	[Header("Aim")]
 	[SerializeField]
 	private CinemachineVirtualCamera aimCam;
@@ -26,11 +27,19 @@ public class PlayerManager : MonoBehaviour
 	[SerializeField]
 	private float aimObjDis = 10f;
 
+
+	[Header("IK")]
+	[SerializeField]
+	private Rig handRig;
+	[SerializeField]
+	private Rig aimRig;
 	// Start is called before the first frame update
 	void Start()
 	{
 		input = GetComponent<StarterAssetsInputs>();
 		controller = GetComponent<ThirdPersonController>();
+		anim = GetComponent<Animator>();
+
 	}
 
 	// Update is called once per frame
@@ -41,7 +50,31 @@ public class PlayerManager : MonoBehaviour
 
 	private void AimCheck()
 	{
+		if (input.reload)
+		{
+			input.reload = false;
 
+			if (controller.isReload)
+			{
+				return;
+			}
+
+			aimCam.gameObject.SetActive(false);
+			aimImage.SetActive(false);
+			controller.isAimMove = false;
+
+            SetRigWeight(0f);
+
+            anim.SetLayerWeight(1, 1f);
+			anim.SetTrigger("Reload");
+			controller.isReload = true;
+
+		}
+
+		if (controller.isReload)
+		{
+			return;
+		}
 
 		if (input.aim)
 		{
@@ -70,11 +103,22 @@ public class PlayerManager : MonoBehaviour
 
 			transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * 50f);
 
+			SetRigWeight(1f);
+
+			if (input.shoot)
+			{
+				anim.SetBool("Shoot", true);
+			}
+			else
+			{
+				anim.SetBool("Shoot", false);
+			}
 		}
 		else
 		{
 			AimControll(false);
-
+			SetRigWeight(0f);
+			anim.SetBool("Shoot", false);
 		}
 	}
 
@@ -83,5 +127,22 @@ public class PlayerManager : MonoBehaviour
 		aimCam.gameObject.SetActive(isCheck);
 		aimImage.SetActive(isCheck);
 		controller.isAimMove = isCheck;
+		anim.SetLayerWeight(1, isCheck ? 1f : 0f);
+
+	}
+
+	public void Reload()
+	{
+		//Debug.Log("Reload");
+		controller.isReload = false;
+		SetRigWeight(1f);
+		anim.SetLayerWeight(1, 0f);
+	}
+
+	private void SetRigWeight(float weight)
+	{
+		aimRig.weight = weight;
+		handRig.weight = weight;
+
 	}
 }
