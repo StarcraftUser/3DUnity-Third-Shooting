@@ -63,9 +63,9 @@ public class PlayerManager : MonoBehaviour
 			aimImage.SetActive(false);
 			controller.isAimMove = false;
 
-            SetRigWeight(0f);
+			SetRigWeight(0f);
 
-            anim.SetLayerWeight(1, 1f);
+			anim.SetLayerWeight(1, 1f);
 			anim.SetTrigger("Reload");
 			controller.isReload = true;
 
@@ -108,6 +108,7 @@ public class PlayerManager : MonoBehaviour
 			if (input.shoot)
 			{
 				anim.SetBool("Shoot", true);
+				GameManager.Instance.Shooting(targetPosition);
 			}
 			else
 			{
@@ -144,5 +145,15 @@ public class PlayerManager : MonoBehaviour
 		aimRig.weight = weight;
 		handRig.weight = weight;
 
+	}
+
+	public void ReroadWeaponClip()
+	{
+		GameManager.Instance.ReroadClip();
+	}
+
+	public void fillMaxAmmo()
+	{
+		GameManager.Instance.fillMaxAmmo();
 	}
 }
