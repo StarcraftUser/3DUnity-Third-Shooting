@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -34,12 +36,28 @@ public class GameManager : MonoBehaviour
 	[SerializeField]
 	private GameObject WeaponClipFX;
 
+	[Header("Enemy")]
+	[SerializeField]
+	private GameObject[] spawnPoint;
+
+	[Header("BGM")]
+	[SerializeField]
+	private AudioClip bgmSound;
+	private AudioSource BGM;
+
+	private PlayableDirector cut;
+	public bool isReady = true;
 
 	void Start()
 	{
 		Instance = this;
 		currentShootDelay = 0f;
+
+		cut = GetComponent<PlayableDirector>();
+		cut.Play();
+
 		InitBullet();
+
 
 	}
 
@@ -112,5 +130,31 @@ public class GameManager : MonoBehaviour
 	private void SetObjPosition(GameObject obj, Transform targetTransform)
 	{
 		obj.transform.position = targetTransform.position;
+	}
+
+	IEnumerator EnemySpawn()
+	{
+		//Instantiate(enemy, spawnPoint[Random.Range(0, spawnPoint.Length)].transform.position, Quaternion.identity);
+		GameObject enemy = PoolManager.instance.ActivateObj(4);
+		SetObjPosition(enemy, spawnPoint[Random.Range(0, spawnPoint.Length)].transform);
+
+		yield return new WaitForSeconds(3f);
+
+		StartCoroutine(EnemySpawn());
+	}
+
+	private void PlayBGMSound()
+	{
+		BGM = GetComponent<AudioSource>();
+		BGM.clip = bgmSound;
+		BGM.loop = true;
+		BGM.Play();
+	}
+
+	public void StartGame()
+	{
+		isReady = false;
+		PlayBGMSound();
+		StartCoroutine(EnemySpawn());
 	}
 }

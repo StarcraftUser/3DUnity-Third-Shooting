@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using UnityEditor.Build.Content;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+
 #endif
 
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
@@ -156,6 +158,10 @@ namespace StarterAssets
 
 		private void Update()
 		{
+			//if (GameManager.Instance.isReady)
+			//{
+				//return;
+			//}
 			_hasAnimator = TryGetComponent(out _animator);
 
 			JumpAndGravity();

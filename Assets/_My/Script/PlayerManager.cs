@@ -57,6 +57,12 @@ public class PlayerManager : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
+		if (GameManager.Instance.isReady)
+		{
+			AimControll(false);
+			SetRigWeight(0f);
+			return;
+		}
 		AimCheck();
 	}
 
